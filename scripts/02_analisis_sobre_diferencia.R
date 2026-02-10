@@ -12,10 +12,6 @@ names(indice_en_diferencia)
 
 grafico<-ggplot(indice_en_diferencia, aes(x=indice_tiempo, y=diferencia))+
   geom_line(color = "steelblue", linewidth = 0.8) +
-  geom_vline(xintercept = valores_en_fecha, 
-             linetype = "dashed", 
-             color = "firebrick", 
-             alpha = 0.7) +
   scale_x_date(date_breaks = "1 years", 
                date_labels = "%Y") +
   theme_minimal() +
@@ -34,7 +30,7 @@ grafico<-ggplot(indice_en_diferencia, aes(x=indice_tiempo, y=diferencia))+
     plot.caption = element_text(hjust = 0)
   ) 
 grafico
-
+ getwd()
 
 
 

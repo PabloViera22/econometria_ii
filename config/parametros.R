@@ -19,8 +19,10 @@ library(here)
 library(tidyverse)
 library(strucchange) #Es para cosas de quiebre de estructura de econometría
 library(forecast) # Para econometria, calcular y graficar Funcion de autocorrelacion y FACP
+
 #library(dplyr)
 library(readxl) #leer excel
+
 library(tseries)# paquete para trabajar series de tiempo papá! Test Dickey-fuller
 library(urca)
 #library(lubridate)
