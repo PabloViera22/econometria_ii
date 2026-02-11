@@ -87,3 +87,18 @@ summary(pp_drift)
 #si el grafico tiene tendencia clara el test correcta fue el primero. Aca no rechazamos si somos prudentes aunque se suele usar al 0.05.
 
 
+#==============================================================================#
+# Vamos a trabajar con la serie en diferencia papá!!!
+# hacemos otra columna con la serie en diferecnai
+
+construya_diferencia<-indice_construya%>%
+  mutate(t_menos_1= lag(sin_estacionalidad3),
+         diferencia=sin_estacionalidad3-t_menos_1)%>%
+  select(-c(con_estacionalidad2,t_menos_1))
+construya_diferencia
+
+
+exportar_data(data = construya_diferencia,nombre = "construya_diferencia", carpeta = "processed")
+
+
+
