@@ -32,6 +32,52 @@ grafico<-ggplot(indice_en_diferencia, aes(x=indice_tiempo, y=diferencia))+
 grafico
  getwd()
 
+#==============================================================================#
+# Queda analizar el cambio de estrucutra
+
+# Calculamos los quiebres usando Bai-Perron
+indice_p_perron<-indice_en_diferencia%>%dplyr::filter(!is.na(diferencia))
+tiempo <- 1:length(indice_p_perron$indice_tiempo)
+tiempo
+
+modelo_tendencia <- breakpoints(indice_p_perron$diferencia ~ tiempo)
+valores_en_fecha<-indice_p_perron$indice_tiempo[c(modelo_tendencia$breakpoints)]
+#CONCLUSION: dice que no hay, eso es bueno
+
+#==============================================================================#
+# Vamos a calcular la FAC y FACP, hacer tambien sus graficos (correlograma)
+grafico_analisis_correlacion <- ggtsdisplay(indice_en_diferencia$diferencia, 
+                                            main = "Análisis de Autocorrelación: Índice Construya En Diferencia",
+                                            theme = theme_minimal())
+
+grafico_acf <- ggAcf(indice_en_diferencia$diferencia) +
+  theme_minimal() +
+  labs(title = "Función de Autocorrelación (ACF)", y = "Correlación")
+# que nos dice el correlograma: NI IDEA, no espeba ver algo así
+
+#==============================================================================#
+# Aplicamos un test Bai-Perron para la varianza
+# 1. Calculamos los residuos (restando la media)
+residuos <- residuals(lm(diferencia ~ 1, data = indice_en_diferencia))
+# 2. Elevamos al cuadrado (esto convierte la varianza en "nivel")
+varianza_proxy <- residuos^2
+
+# Buscamos quiebres en la media de los residuos al cuadrado
+modelo_varianza <- breakpoints(varianza_proxy ~ 1)
+
+# Ver el resumen para ver cuántos quiebres sugiere el BIC
+summary(modelo_varianza)
+
+indice_en_diferencia$indice_tiempo[c(37,67)]
+# RESULTADO: tres cortes. Podemos cortar la serie, aplicar dummies, o modelo ARCH/GARCH
+
+
+
+
+
+
+
+
 
 
 
