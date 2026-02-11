@@ -87,3 +87,40 @@ summary(pp_drift)
 #si el grafico tiene tendencia clara el test correcta fue el primero. Aca no rechazamos si somos prudentes aunque se suele usar al 0.05.
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
