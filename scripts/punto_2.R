@@ -102,3 +102,38 @@ exportar_data(data = construya_diferencia,nombre = "construya_diferencia", carpe
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+>>>>>>> 7466b4bcbad2fb43f7ef95e119dd8110f2632e76
+
+
+
