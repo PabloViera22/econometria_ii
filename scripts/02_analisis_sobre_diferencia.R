@@ -10,7 +10,7 @@ names(indice_en_diferencia)
 #==============================================================================#
 # Graficamos
 
-grafico<-ggplot(indice_en_diferencia, aes(x=indice_tiempo, y=diferencia))+
+grafico<-ggplot(indice_en_diferencia, aes(x=indice_tiempo, y=log_diferencia))+
   geom_line(color = "steelblue", linewidth = 0.8) +
   scale_x_date(date_breaks = "1 years", 
                date_labels = "%Y") +
@@ -28,7 +28,7 @@ grafico<-ggplot(indice_en_diferencia, aes(x=indice_tiempo, y=diferencia))+
     legend.position = "bottom",
     axis.text.x = element_text(size = 10, face = "bold"),
     plot.caption = element_text(hjust = 0)
-  ) 
+  )
 grafico
  getwd()
 
@@ -36,21 +36,21 @@ grafico
 # Queda analizar el cambio de estrucutra
 
 # Calculamos los quiebres usando Bai-Perron
-indice_p_perron<-indice_en_diferencia%>%dplyr::filter(!is.na(diferencia))
+indice_p_perron<-indice_en_diferencia%>%dplyr::filter(!is.na(log_diferencia))
 tiempo <- 1:length(indice_p_perron$indice_tiempo)
 tiempo
 
-modelo_tendencia <- breakpoints(indice_p_perron$diferencia ~ tiempo)
+modelo_tendencia <- breakpoints(indice_p_perron$log_diferencia ~ tiempo)
 valores_en_fecha<-indice_p_perron$indice_tiempo[c(modelo_tendencia$breakpoints)]
 #CONCLUSION: dice que no hay, eso es bueno
 
 #==============================================================================#
 # Vamos a calcular la FAC y FACP, hacer tambien sus graficos (correlograma)
-grafico_analisis_correlacion <- ggtsdisplay(indice_en_diferencia$diferencia, 
+grafico_analisis_correlacion <- ggtsdisplay(indice_en_diferencia$log_diferencia, 
                                             main = "Análisis de Autocorrelación: Índice Construya En Diferencia",
                                             theme = theme_minimal())
 
-grafico_acf <- ggAcf(indice_en_diferencia$diferencia) +
+grafico_acf <- ggAcf(indice_en_diferencia$log_diferencia) +
   theme_minimal() +
   labs(title = "Función de Autocorrelación (ACF)", y = "Correlación")
 # que nos dice el correlograma: NI IDEA, no espeba ver algo así
@@ -58,7 +58,7 @@ grafico_acf <- ggAcf(indice_en_diferencia$diferencia) +
 #==============================================================================#
 # Aplicamos un test Bai-Perron para la varianza
 # 1. Calculamos los residuos (restando la media)
-residuos <- residuals(lm(diferencia ~ 1, data = indice_en_diferencia))
+residuos <- residuals(lm(log_diferencia ~ 1, data = indice_en_diferencia))
 # 2. Elevamos al cuadrado (esto convierte la varianza en "nivel")
 varianza_proxy <- residuos^2
 
@@ -69,7 +69,12 @@ modelo_varianza <- breakpoints(varianza_proxy ~ 1)
 summary(modelo_varianza)
 
 indice_en_diferencia$indice_tiempo[c(37,67)]
-# RESULTADO: tres cortes. Podemos cortar la serie, aplicar dummies, o modelo ARCH/GARCH
+# RESULTADO: dos cortes (EL BIC es menor) Podemos cortar la serie, aplicar dummies, o modelo ARCH/GARCH
+
+
+
+
+
 
 
 

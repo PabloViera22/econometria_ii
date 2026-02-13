@@ -93,7 +93,7 @@ summary(pp_drift)
 
 construya_diferencia<-indice_construya%>%
   mutate(t_menos_1= lag(sin_estacionalidad3),
-         diferencia=sin_estacionalidad3-t_menos_1)%>%
+         log_diferencia=log(sin_estacionalidad3)-log(t_menos_1))%>%
   select(-c(con_estacionalidad2,t_menos_1))
 construya_diferencia
 
