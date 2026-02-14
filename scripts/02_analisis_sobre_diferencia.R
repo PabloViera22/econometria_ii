@@ -70,16 +70,7 @@ modelo_varianza <- breakpoints(varianza_proxy ~ 1)
 summary(modelo_varianza)
 
 indice_en_diferencia$indice_tiempo[c(37,67)]
-<<<<<<< HEAD
-# RESULTADO: dos cortes nos devuelve el BIC mas bajo. Podemos cortar la serie, aplicar dummies, o modelo ARCH/GARCH
-=======
-# RESULTADO: dos cortes (EL BIC es menor) Podemos cortar la serie, aplicar dummies, o modelo ARCH/GARCH
 
-
-
-
-
->>>>>>> 18c59521f11b0c4516adccb4958e0eb3d028c7bc
 
 
 
