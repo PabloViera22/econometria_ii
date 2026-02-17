@@ -5,6 +5,7 @@ source(here::here("funciones", "funciones_para_importar_exportar.R"))
 # Importamos los datos
 indice_en_diferencia<-impo_datos(nombre_archivo = "construya_diferencia.csv",carpeta = "processed")
 indice_en_diferencia
+nrow(indice_en_diferencia)
 
 names(indice_en_diferencia)
 #==============================================================================#
@@ -43,6 +44,7 @@ tiempo
 modelo_tendencia <- breakpoints(indice_p_perron$log_diferencia ~ tiempo)
 valores_en_fecha<-indice_p_perron$indice_tiempo[c(modelo_tendencia$breakpoints)]
 #CONCLUSION: dice que no hay, eso es bueno
+
 
 #==============================================================================#
 # Vamos a calcular la FAC y FACP, hacer tambien sus graficos (correlograma)

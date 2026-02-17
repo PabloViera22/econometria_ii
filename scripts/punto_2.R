@@ -7,8 +7,6 @@ source(here::here("funciones", "funciones_visualizacion.R"))
 indice_construya<-impo_datos(nombre_archivo = "indice_construya.xlsx",carpeta = "raw")
 indice_construya
 summary(indice_construya)
-
-indice_construya[78,1]
 #==============================================================================#
 # Calculamos los quiebres usando Bai-Perron
 
@@ -17,10 +15,8 @@ tiempo
 
 modelo_tendencia <- breakpoints(indice_construya$sin_estacionalidad3 ~ tiempo)
 valores_en_fecha<-indice_construya$indice_tiempo[c(modelo_tendencia$breakpoints)]
-
-
 #==============================================================================#
-#  
+# Graficamos las quiebres de tendencia
 
 grafico<-ggplot(indice_construya, aes(x=indice_tiempo, y=sin_estacionalidad3))+
   geom_line(color = "steelblue", linewidth = 0.8) +
