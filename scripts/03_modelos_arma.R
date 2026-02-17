@@ -36,17 +36,6 @@ modelo_ma01 <- arima(mi_serie, order = c(0, 0, 1)) # aic = -488
 modelo_ma02 <- arima(mi_serie, order = c(0, 0, 2)) # aic = -491**
 modelo_ma03 <- arima(mi_serie, order = c(0, 0, 3)) # aic = -489
 modelo_ma04 <- arima(mi_serie, order = c(0, 0, 4)) # aic = -488
-<<<<<<< HEAD
-modelo_ma05 <- arima(mi_serie, order = c(0, 0, 5)) # aic = -487
-modelo_ma06 <- arima(mi_serie, order = c(0, 0, 6)) # aic = -487
-modelo_ma07 <- arima(mi_serie, order = c(0, 0, 7)) # aic = -485
-modelo_ma08 <- arima(mi_serie, order = c(0, 0, 8)) # aic = -489
-modelo_ma09 <- arima(mi_serie, order = c(0, 0, 9)) # aic = -489
-modelo_ma10 <- arima(mi_serie, order = c(0, 0, 10)) # aic = -489
-modelo_ma11 <- arima(mi_serie, order = c(0, 0, 11)) # aic = -493
-modelo_ma12 <- arima(mi_serie, order = c(0, 0, 12)) #aic = -498
-BIC(modelo_ma12)#-451
-=======
 modelo_ma05 <- arima(mi_serie, order = c(0, 0, 5)) 
 modelo_ma06 <- arima(mi_serie, order = c(0, 0, 6)) 
 modelo_ma07 <- arima(mi_serie, order = c(0, 0, 7)) 
@@ -55,8 +44,6 @@ modelo_ma09 <- arima(mi_serie, order = c(0, 0, 9))
 modelo_ma10 <- arima(mi_serie, order = c(0, 0, 10))
 modelo_ma11 <- arima(mi_serie, order = c(0, 0, 11))
 modelo_ma12 <- arima(mi_serie, order = c(0, 0, 12)) 
->>>>>>> 2a5954b2a2b6793ff739ac6b961f6c264340d9c7
-
 
 modelo_arma01 <- arima(mi_serie, order = c(1, 0, 1)) # aic = -491**
 modelo_arma02 <- arima(mi_serie, order = c(2, 0, 1)) # aic = -489
@@ -103,28 +90,11 @@ aic_arma<-sapply(nombres_modelos, function(modelo){get(modelo)$aic})
 bic_arma_orden<-sort(bic_arma) #ordenamos de menor a mayor
 aic_arma_orden<-sort(aic_arma)
 
-
-<<<<<<< HEAD
-### *** EXTRA ***
-modelo <- Arima(mi_serie, 
-                order = c(1,0,0),           # Parte regular: AR(1)
-                seasonal = c(2,0,0))         # Parte estacional: AR(2) con periodo 12
-# aic=-502      BIC=-486
-checkresiduals(modelo)
-barlett(modelo)#presenta heterocedasticidad
-ljung(modelo)# presenta autocorrelacion en los errores
-residuos<-na.omit(residuals(modelo))
-
-acf(residuos)
-
-# Bamodelo# Bartlett test
-bartlett.test(residuos ~ grupos) 
-=======
 #los juntamos a todos
 
 sort(c(bic_ar,bic_arma, bic_ma))
 sort(c(aic_ar,aic_arma, aic_ma))
->>>>>>> 2a5954b2a2b6793ff739ac6b961f6c264340d9c7
+
 
 #==============================================================================#
 # Los residuos o errores presentan autocorrelacion?
@@ -134,29 +104,6 @@ nombres_modelos_ma<-paste0("modelo_ma", formatC(1:12, width = 2, flag = 0))
 nombres_modelos_ar<-paste0("modelo_ar", formatC(1:12, width = 2, flag = 0))
 vector_nombres_modelos<-c(nombres_modelos_ar,nombres_modelos_ma)
 
-<<<<<<< HEAD
-# PRIMERO TEST de BARLETT
-tsdiag(modelo_ar02)#me lo dio chatGPT. Tiene el gráfico del TestQ (Ljung-Box)
-
-
-# Barlett para los AR
-modelos_nombres<-paste0("modelo_ar", formatC(1:12, width = 2, flag = 0))
-sapply(X = modelos_nombres, function(nombre){j<-barlett(get(nombre))
-j$p.value})
-
-# Barlett para los MA
-modelos_nombres_ma<-paste0("modelo_ma", formatC(1:4, width = 2, flag = 0))
-sapply(X = modelos_nombres_ma, function(nombre){j<-barlett(get(nombre))
-j$p.value})
-
-# Barlett para los ARMA
-modelos_nombres_arma<-paste0("modelo_ma", formatC(1:4, width = 2, flag = 0))
-sapply(X = modelos_nombres_arma, function(nombre){j<-barlett(get(nombre))
-j$p.value})
-
-barlett(modelo_arma12)
-#El p valor es muy chico, RECHAZO H_0, la varianza cambia entre grupos
-=======
 # Test Ljun-Box para ar y ma
 ljung_para_ar_y_ma<-sapply(vector_nombres_modelos, function(modelo){ljung(get(modelo))})
 sort(ljung_para_ar_y_ma, decreasing = T)
@@ -179,8 +126,6 @@ bai_perron()
 hey<-bai_perron(modelo = modelo_ma02)
 hey
 #==============================================================================#
->>>>>>> 2a5954b2a2b6793ff739ac6b961f6c264340d9c7
-
 # TEST DE JLUNG-BOX
 #Para los AR
 modelos_nombres<-paste0("modelo_ar", formatC(1:12, width = 2, flag = 0))
@@ -199,29 +144,8 @@ j$p.value})
 # CONCLUSION: como vimos con el test de BaiPerron esta mierda tiene cambio es-
 #-tructural en la varianza y se traslada al error
 # VAMO A REDUCIR LA MUESTRA PARA EVITAR ESTE PROBLEMON
+
 #==============================================================================#
-
-<<<<<<< HEAD
-
-
-sapply(X = modelos_nombres, function(nombre){ArchTest(residuals(nombre))
-})
-
-ArchTest(residuals(modelo_ar02))
-
-
-chec
-
-
-
-
-
-
-
-
-
-
-=======
 # VAMOS A VER QUE ONDA LA AUTOCORRELACION DE LOS ERRORES DE LA "PREDICCION"
 #QUE ES LO QUE IMPORTA
 #==============================================================================#
@@ -237,6 +161,6 @@ sapply(nombres_modelos, function(modelo){grafico_residuo(get(modelo))})
 # VEMOS AHORA LOS MA
 nombres_modelos_ma<-paste0("modelo_ma", formatC(1:12, width = 2, flag = 0))
 sapply(nombres_modelos_ma, function(modelo){ljung(get(modelo))})
->>>>>>> 2a5954b2a2b6793ff739ac6b961f6c264340d9c7
+
 
 
