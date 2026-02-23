@@ -3,12 +3,22 @@ source(here::here("funciones", "funciones_para_importar_exportar.R"))
 source(here::here("funciones", "funciones_visualizacion.R"))
 
 #==============================================================================#
-# Importamos los datos
+# Importamos los datos para punto 2
 indice_construya<-impo_datos(nombre_archivo = "indice_construya.xlsx",carpeta = "raw")
 indice_construya
 summary(indice_construya)
 
 indice_construya[78,1]
+
+
+#==============================================================================#
+# Importamos los datos para punto 2
+#==============================================================================#
+
+
+
+
+
 #==============================================================================#
 # Calculamos los quiebres usando Bai-Perron
 
