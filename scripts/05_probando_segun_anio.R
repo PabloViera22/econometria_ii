@@ -1,3 +1,4 @@
+# LO DEJO PERO ESTÁ OBSOLETO, NO SIRVE.
 source(here::here("config", "parametros.R"))
 source(here::here("funciones", "funciones_para_importar_exportar.R"))
 source(here::here("funciones", "funciones_econometria_ii.R"))

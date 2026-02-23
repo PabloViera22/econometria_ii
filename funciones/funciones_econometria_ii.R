@@ -60,8 +60,12 @@ bartlett<-function(modelo){
 bai_perron<-function(modelo){
   residuos <- residuals(modelo)
   cuadrados <- residuos^2
-  bp_auto <- breakpoints(cuadrados ~ 1, h = 0.15)  
-  return(bp_auto)
+  bp_auto <- breakpoints(cuadrados ~ 1, h = 0.15)
+  quiebre<-bp_auto$breakpoints
+  if (is.na(quiebre[1])) {
+    message("No se detectaron quiebres estructurales significativos.")
+  }
+  return(quiebre)
 }
 
 

@@ -3,6 +3,7 @@ source(here::here("funciones", "funciones_para_importar_exportar.R"))
 
 #==============================================================================#
 # Importamos los datos
+#==============================================================================#
 indice_en_diferencia<-impo_datos(nombre_archivo = "construya_diferencia.csv",carpeta = "processed")
 indice_en_diferencia
 nrow(indice_en_diferencia)
@@ -10,7 +11,7 @@ nrow(indice_en_diferencia)
 names(indice_en_diferencia)
 #==============================================================================#
 # Graficamos
-
+#==============================================================================#
 grafico<-ggplot(indice_en_diferencia, aes(x=indice_tiempo, y=log_diferencia))+
   geom_line(color = "steelblue", linewidth = 0.8) +
   scale_x_date(date_breaks = "1 years", 
@@ -34,32 +35,40 @@ grafico
  getwd()
 
 #==============================================================================#
-# Queda analizar el cambio de estrucutra
-
-# Calculamos los quiebres usando Bai-Perron
+# Queda analizar el cambio de estructura
+#==============================================================================#
+# Calculamos los quiebres en la tendencuia usando Bai-Perron
 indice_p_perron<-indice_en_diferencia%>%dplyr::filter(!is.na(log_diferencia))
 tiempo <- 1:length(indice_p_perron$indice_tiempo)
-tiempo
 
 modelo_tendencia <- breakpoints(indice_p_perron$log_diferencia ~ tiempo)
 valores_en_fecha<-indice_p_perron$indice_tiempo[c(modelo_tendencia$breakpoints)]
-#CONCLUSION: dice que no hay, eso es bueno
+#CONCLUSION: dice que no hay cambios en la tendencia, eso es bueno
 
+# Calculamos los quiebres en la media usando Bai-Perron
+modelo_tendencia <- breakpoints(indice_en_diferencia$log_diferencia ~ 1)
+valores_en_fecha<-indice_en_diferencia$indice_tiempo[c(modelo_tendencia$breakpoints)]
+valores_en_fecha
+#CONCLUSION: dice que no hay cambios en la media
+
+
+# Calculamos los quiebres en los coeficientes Bai-Perron
+y<-indice_en_diferencia$log_diferencia
+modelo_tendencia <- breakpoints(y ~ lag(y,1))
+valores_en_fecha<-indice_en_diferencia$indice_tiempo[c(modelo_tendencia$breakpoints)]
+valores_en_fecha
+# HAY CAMBIOS EN LOS COEFICIENTES!!!!!
 
 #==============================================================================#
-# Vamos a calcular la FAC y FACP, hacer tambien sus graficos (correlograma)
-grafico_analisis_correlacion <- ggtsdisplay(indice_en_diferencia$log_diferencia, 
-                                            main = "Análisis de Autocorrelación: Índice Construya En Diferencia",
-                                            theme = theme_minimal())
-print(grafico_analisis_correlacion)
-
-grafico_acf <- ggAcf(indice_en_diferencia$log_diferencia) +
-  theme_minimal() +
-  labs(title = "Función de Autocorrelación (ACF)", y = "Correlación")
-# que nos dice el correlograma: NI IDEA, no espeba ver algo así
+# Tengo mis dudas, uso un test de chow
+#==============================================================================#
+test_chow <- sctest(y ~ lag(y,1), type = "Chow", point = 63)
+test_chow
 
 #==============================================================================#
-# Aplicamos un test Bai-Perron para la varianza
+# Aplicamos un test Bai-Perron para la varianza YAPA
+#==============================================================================#
+
 # 1. Calculamos los residuos (restando la media)
 residuos <- residuals(lm(log_diferencia ~ 1, data = indice_en_diferencia))
 # 2. Elevamos al cuadrado (esto convierte la varianza en "nivel")
@@ -72,6 +81,27 @@ modelo_varianza <- breakpoints(varianza_proxy ~ 1)
 summary(modelo_varianza)
 
 indice_en_diferencia$indice_tiempo[c(37,67)]
+
+#==============================================================================#
+# Vamos a calcular la FAC y FACP, hacer tambien sus graficos (correlograma)
+#==============================================================================#
+grafico_analisis_correlacion <- ggtsdisplay(indice_en_diferencia$log_diferencia, 
+                                            main = "Análisis de Autocorrelación: Índice Construya En Diferencia",
+                                            theme = theme_minimal())
+print(grafico_analisis_correlacion)
+
+grafico_acf <- ggAcf(indice_en_diferencia$log_diferencia) +
+  theme_minimal() +
+  labs(title = "Función de Autocorrelación (ACF)", y = "Correlación")
+# que nos dice el correlograma: NI IDEA, no espeba ver algo así
+
+
+#==============================================================================#
+# Vamos a "arreglar" el cambio estructural mediante dummies
+#==============================================================================#
+indice_con_dummie<-indice_en_diferencia%>% mutate(dummie=if_else(1:length(indice_en_diferencia$indice_tiempo) >= 63, 1, 0))
+
+exportar_data(data = indice_con_dummie,nombre = "indice_con_dummies",carpeta = "processed", format = "csv")
 
 
 
