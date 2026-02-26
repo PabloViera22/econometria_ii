@@ -5,19 +5,15 @@ source(here::here("funciones", "funciones_para_importar_exportar.R"))
 # Importamos los datos
 #==============================================================================#
 indice_en_diferencia<-impo_datos(nombre_archivo = "construya_diferencia.csv",carpeta = "processed")
-indice_en_diferencia
-nrow(indice_en_diferencia)
+indice_en_diferencia_ts<-indice_construya_ts<-ts(indice_en_diferencia$value,start = c(2017,1), frequency = 12)
+nrow(indice_en_diferencia_ts)
 
-names(indice_en_diferencia)
+names(indice_en_diferencia_ts)
 #==============================================================================#
 # Graficamos
 #==============================================================================#
-grafico<-ggplot(indice_en_diferencia, aes(x=indice_tiempo, y=log_diferencia))+
-  geom_line(color = "steelblue", linewidth = 0.8) +
-  scale_x_date(date_breaks = "1 years", 
-               date_labels = "%Y") +
+grafico <- autoplot(indice_construya_ts, colour = 'steelblue', linewidth = 0.8) +
   theme_minimal() +
-  
   theme(
     plot.title = element_text(size = 14, face = "bold"),
     plot.subtitle = element_text(size = 12, color = "gray60"),
@@ -32,17 +28,16 @@ grafico<-ggplot(indice_en_diferencia, aes(x=indice_tiempo, y=log_diferencia))+
     plot.caption = element_text(hjust = 0)
   )
 grafico
- getwd()
 
 #==============================================================================#
 # Queda analizar el cambio de estructura
 #==============================================================================#
 # Calculamos los quiebres en la tendencuia usando Bai-Perron
-indice_p_perron<-indice_en_diferencia%>%dplyr::filter(!is.na(log_diferencia))
-tiempo <- 1:length(indice_p_perron$indice_tiempo)
 
-modelo_tendencia <- breakpoints(indice_p_perron$log_diferencia ~ tiempo)
-valores_en_fecha<-indice_p_perron$indice_tiempo[c(modelo_tendencia$breakpoints)]
+
+modelo_tendencia <- breakpoints(indice_construya_ts ~ time(indice_construya_ts))
+#==============================================================================##==============================================================================##==============================================================================##==============================================================================##==============================================================================#
+
 #CONCLUSION: dice que no hay cambios en la tendencia, eso es bueno
 
 # Calculamos los quiebres en la media usando Bai-Perron
