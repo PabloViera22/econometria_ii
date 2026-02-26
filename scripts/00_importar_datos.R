@@ -3,6 +3,12 @@ source(here::here("funciones", "funciones_para_importar_exportar.R"))
 source(here::here("funciones", "funciones_visualizacion.R"))
 
 #==============================================================================#
+# Fecha piso mas alta y ultima fecha menor
+#==============================================================================#
+comienzo<-ymd("2017-01-01")
+final<-ymd("2025-11-01")
+
+#==============================================================================#
 # Importamos los datos de stock de pestamos al sector privado para punto 3
 #==============================================================================#
 
@@ -13,10 +19,13 @@ prestamos<-api_bcra(token = token,endpoint ="prestamos")
 stock_prestamo_mensual<-prestamos%>%arrange(d)%>% 
   group_by(anio=year(d), mes=month(d))%>%
   slice_head(n = 1) %>%
-  ungroup()
+
 
 exportar_data(data = stock_prestamo_mensual, nombre = "prestamos", carpeta = "raw",format = "csv")
+
 prestamo_mensual<-impo_datos(nombre_archivo = "prestamos.csv",carpeta = "raw")
+prestamo_mensual_acortado<-prestamo_mensual%>%filter(d>=comienzo,d<=final)
+exportar_data(data = exportar_data(data = prestamo_mensual_acortado, nombre = "prestamos_acortado", carpeta = "clean",format = "csv"), nombre = "prestamos", carpeta = "raw",format = "csv")
 
 # hay que desestacionalizarla a la basura esta
 
@@ -25,23 +34,29 @@ prestamo_mensual<-impo_datos(nombre_archivo = "prestamos.csv",carpeta = "raw")
 #==============================================================================#
 emae<-impo_datos(nombre_archivo = "sh_emae_mensual_base2004.xls",carpeta ="raw")
 
-emae<-read_excel("D:/ProyectosR/econoii/data/raw/sh_emae_mensual_base2004.xls", sheet= "Hoja1")
+emae<-read_excel(file.path(dir_data_raw, "sh_emae_mensual_base2004.xls"), sheet= "Hoja1")
 
-emae_orden<-emar%>%fill(anio, .direction = "down")
+emae_orden <- emae %>% fill(anio, .direction = "down") %>%
+  # Creamos la fecha asumiendo que es el día 1 de cada mes
+  mutate(fecha = ymd(paste(anio, mes, "01", sep = "-"))) %>% 
+  dplyr::select(fecha, indice_serie_original_base_2004)
 
 exportar_data(data = emae_orden, nombre = "emae", carpeta = "processed")
 
-emae_viejo<-impo_datos(nombre_archivo = "emae.csv",carpeta = "processed")
+emae_para_acortar<-impo_datos(nombre_archivo = "emae.csv",carpeta = "processed")
+emae_acortado<-emae_para_acortar%>%filter(fecha>=comienzo,fecha<=final)
+exportar_data(data = emae_acortado,nombre = "emae_acortado",carpeta = "clean")
+
 #junio 2025
 #==============================================================================#
 # datos de tipo de cambio real 2
 #==============================================================================#
 
-cambio_real<-read_excel(path = "D:/ProyectosR/econoii/data/raw/ITCRMSerie.xlsx",
+cambio_real<-read_excel(path = file.path(dir_data_raw, "ITCRMSerie.xlsx"),
                         skip = 1,
                         col_names = T)
 
-itcrm<-cambio_real%>%select(c(fecha=Período,itcrm=ITCRM))%>%mutate(mes=month(fecha))
+itcrm<-cambio_real%>%dplyr::select(c(fecha=Período,itcrm=ITCRM))%>%mutate(mes=month(fecha))
 
 # TRANSFORMAR DATOS DIARIOS EN PROMEDIOS MENSUALES
 itcrm_mensual <- itcrm %>%
@@ -54,13 +69,15 @@ itcrm_mensual <- itcrm %>%
 
 
 exportar_data(data = itcrm_mensual, nombre = "itcrm_mensual", carpeta = "processed")
-
 #hasta 2026-02
 
+itcrm_m<-impo_datos(nombre_archivo = "itcrm_mensual.csv",carpeta = "processed")
+itcrm_acortado<-itcrm_m%>%filter(fecha>=comienzo,fecha<=final)
+exportar_data(data = itcrm_acortado, nombre = "itcrm_acortado", carpeta = "clean")
 #==============================================================================#
 # datos de tasa de interés 3
 #==============================================================================#
-badlar<-read_excel(path = "D:/ProyectosR/econoii/data/raw/tasa_de_interes_badlar.xlsx")
+badlar<-read_excel(path = file.path(dir_data_raw, "tasa_de_interes_badlar.xlsx"))
 
 badlar_nom<-badlar%>%select(fecha=Fecha,valor_badlar_porc=`Valor BADLAR (%)`,variacion_porc=`Variación (%)`)
 
@@ -77,6 +94,9 @@ badlar_mes<-badlar_nom%>%
 
 exportar_data(data = badlar_mes, nombre = "interes_badlar", carpeta = "processed")
 
+badlar_m<-impo_datos(nombre_archivo = "interes_badlar.csv",carpeta = "processed")
+badlar_acortado<-badlar_m%>%filter(fecha>=comienzo,fecha<=final)
+exportar_data(data = badlar_acortado, nombre = "badlar_acortado", carpeta = "clean")
 # hasta 2025/09
 
 #==============================================================================#
@@ -120,9 +140,12 @@ exportar_data(data = indice_construya_acortado,nombre ="indice_construya_acortad
 #==============================================================================#
 inflacion<-impo_datos(nombre_archivo = "indice-precios-al-consumidor-apertura-por-categorias-base-diciembre-2016-mensual.csv", carpeta = "raw")
 inflacion_nombre<-inflacion%>%select(indice_tiempo, ipc_nivel_general_nacional)
-tail(inflacion_nombre)
-#hasta 2025/08
 
+inflacion_acortada<-inflacion_nombre%>%filter(indice_tiempo <="2025-11-01")%>%
+  filter(indice_tiempo >="2017-01-01")%>%
+  arrange(indice_tiempo)
+#hasta 2025/08
+exportar_data(data = inflacion_acortada,nombre = "inflacion_acortada",carpeta = "clean")
 
 
 

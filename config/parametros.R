@@ -55,6 +55,7 @@ library(kableExtra)   # Tablas mejoradas
 #library(ggrepel) # Etiquetas para los graficos de outliers
 library(stargazer)
 library(vars) # para trbajar con modelos VAR
+library(timetk) # para poder ocnvertir serie de tiempo para csv
 
 # DEFINIR DIRECTORIO DE MANERA RERODUCIBLE
 if (!exists("proyecto_econoii")) {
@@ -69,6 +70,8 @@ dir_outputs_figures <- file.path(proyecto_econoii, "outputs", "figures")
 dir_outputs_tables <- file.path(proyecto_econoii, "outputs", "tables")
 dir_scripts<-file.path(proyecto_econoii, "scripts")
 
+
+
 # CREAR DIRECTORIOS SI NO EXISTEN
 dirs_crear <- c(dir_data_raw, dir_data_clean,dir_data_processed, 
                 dir_outputs_figures, dir_outputs_tables,
@@ -79,7 +82,12 @@ for (dir in dirs_crear) {
   }
 }
 
-# PARAMETROS DE ANÁLISIS
+# Solucion de problema de select de dplyr y MASS
+library(conflicted)
+
+# Decile a R: "En este conflicto, ganará siempre dplyr"
+conflict_prefer("select", "dplyr")
+conflict_prefer("filter", "dplyr")
 
 
 
