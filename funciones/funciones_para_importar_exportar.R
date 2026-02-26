@@ -85,6 +85,7 @@ impo_datos <- function(nombre_archivo, carpeta = "raw", encoding = "UTF-8") {
   
   datos <- switch(extension,
                   "csv" = read_csv(ruta_completa, locale = locale(encoding = encoding)),
+                  "xls"= read_excel(ruta_completa),
                   "xlsx" = read_excel(ruta_completa),
                   "rds" = readRDS(ruta_completa),
                   "txt" = read_delim(ruta_completa, locale = locale(encoding = encoding)),
@@ -98,13 +99,34 @@ impo_datos <- function(nombre_archivo, carpeta = "raw", encoding = "UTF-8") {
 
 
 
-
-
-
-
-
-
-
+#==============================================================================#
+# FUNCION PARA IMPORTAR DATOS DEL BCRA
+#==============================================================================#
+api_bcra<-function(token = Sys.getenv("BCRA_TOKEN"),
+                   endpoint){
+  base_url<-"https://api.estadisticasbcra.com"
+  # Validación básica
+  if (token == "") {
+    stop("No se encontró el token. Definilo con Sys.setenv(BCRA_TOKEN = 'TU_TOKEN')")
+  }
+  url_final <- paste0(base_url, "/", endpoint)
+  respuesta<-GET( url = url_final,
+                  add_headers(
+                    Authorization = paste("BEARER", token)
+                  ))
+  # Chequear errores HTTP
+  stop_for_status(respuesta)
+  # Parsear contenido
+  contenido <- content(respuesta, as = "text", encoding = "UTF-8")
+  datos <- fromJSON(contenido, flatten = TRUE)
+  df <- as.data.frame(datos)
+  
+  # Convertir fecha si existe
+  if ("d" %in% names(df)) {
+    df$d <- as.Date(df$d)
+  }
+  return(df)
+}
 
 
 

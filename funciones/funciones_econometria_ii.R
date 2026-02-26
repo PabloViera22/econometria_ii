@@ -68,8 +68,16 @@ bai_perron<-function(modelo){
   return(quiebre)
 }
 
-
-
+#==============================================================================#
+# Desestacionalizar
+#==============================================================================#
+desestacionalizar<-function(modelo){
+  mes <- factor(cycle(modelo))
+  modelo_estacional <- lm(modelo ~ mes)
+  modelo_des<-residuals(modelo_estacional)
+  adf<-adf.test(modelo_des)
+  return(adf$p.value)
+}
 
 
 

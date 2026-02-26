@@ -17,15 +17,17 @@ options(digits = 2) # Decimales a mostrar
 # LIBRERÍAS DEL PROYECTO
 library(here)
 library(tidyverse)
+library(lubridate)
 library(strucchange) #Es para cosas de quiebre de estructura de econometría
 library(forecast) # Para econometria, calcular y graficar Funcion de autocorrelacion y FACP
 
+library(httr) #traer info de apis
+library(jsonlite)# para reestructurar datos jason
 #library(dplyr)
 library(readxl) #leer excel
 
 library(tseries)# paquete para trabajar series de tiempo papá! Test Dickey-fuller
 library(urca)
-#library(lubridate)
 #library(scales)
 #library(readr)
 # library(naniar) # Librería para analizar datos faltantes
@@ -52,6 +54,7 @@ library(kableExtra)   # Tablas mejoradas
 #library(rlang)
 #library(ggrepel) # Etiquetas para los graficos de outliers
 library(stargazer)
+library(vars) # para trbajar con modelos VAR
 
 # DEFINIR DIRECTORIO DE MANERA RERODUCIBLE
 if (!exists("proyecto_econoii")) {
