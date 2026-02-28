@@ -2,13 +2,10 @@ source(here::here("config", "parametros.R"))
 source(here::here("funciones", "funciones_para_importar_exportar.R"))
 
 #==============================================================================#
-# Importamos los datos
+# Importamos la serie de tiempo
 #==============================================================================#
-indice_en_diferencia<-impo_datos(nombre_archivo = "construya_diferencia.csv",carpeta = "processed")
-indice_en_diferencia_ts<-indice_construya_ts<-ts(indice_en_diferencia$value,start = c(2017,1), frequency = 12)
-nrow(indice_en_diferencia_ts)
+indice_en_diferencia_ts<- readRDS(file.path(dir_data_clean, "serie.rds"))
 
-names(indice_en_diferencia_ts)
 #==============================================================================#
 # Graficamos
 #==============================================================================#
@@ -41,15 +38,13 @@ modelo_tendencia <- breakpoints(indice_construya_ts ~ time(indice_construya_ts))
 #CONCLUSION: dice que no hay cambios en la tendencia, eso es bueno
 
 # Calculamos los quiebres en la media usando Bai-Perron
-modelo_tendencia <- breakpoints(indice_en_diferencia$log_diferencia ~ 1)
-valores_en_fecha<-indice_en_diferencia$indice_tiempo[c(modelo_tendencia$breakpoints)]
-valores_en_fecha
+modelo_tendencia <- breakpoints(indice_en_diferencia_ts ~ 1)
 #CONCLUSION: dice que no hay cambios en la media
 
 
 # Calculamos los quiebres en los coeficientes Bai-Perron
-y<-indice_en_diferencia$log_diferencia
-modelo_tendencia <- breakpoints(y ~ lag(y,1))
+
+modelo_tendencia <- breakpoints(indice_en_diferencia_ts ~ stats::lag(indice_en_diferencia_ts)) #quiebre en el 2018m4
 valores_en_fecha<-indice_en_diferencia$indice_tiempo[c(modelo_tendencia$breakpoints)]
 valores_en_fecha
 # HAY CAMBIOS EN LOS COEFICIENTES!!!!!
@@ -94,11 +89,7 @@ grafico_acf <- ggAcf(indice_en_diferencia$log_diferencia) +
 #==============================================================================#
 # Vamos a "arreglar" el cambio estructural mediante dummies
 #==============================================================================#
-indice_con_dummie<-indice_en_diferencia%>% mutate(dummie=if_else(1:length(indice_en_diferencia$indice_tiempo) >= 63, 1, 0))
-
-exportar_data(data = indice_con_dummie,nombre = "indice_con_dummies",carpeta = "processed", format = "csv")
-
-
+# la dummies se utiliza a partir del 2018(4)
 
 
 

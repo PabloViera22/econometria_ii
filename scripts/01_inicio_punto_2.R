@@ -90,7 +90,8 @@ summary(pp_drift)
 # Vamos a trabajar con la serie en diferencia papá!!!
 # hacemos otra columna con la serie en diferecnai
 construya_log_diff <- diff(log(indice_construya_ts))
-construya_ts_log_diff <- tk_tbl(construya_log_diff, rename_index = "fecha")
 
-exportar_data(data = construya_ts_log_diff,nombre = "construya_diferencia", carpeta = "processed")
+# Guardar una serie de tiempo
+saveRDS(construya_log_diff, file.path(dir_data_clean, "serie.rds"))
+
 

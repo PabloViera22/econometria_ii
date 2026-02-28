@@ -4,17 +4,22 @@ source(here::here("funciones", "funciones_econometria_ii.R"))
 
 #==============================================================================#
 # Importamos los datos
-indice_en_diferencia<-impo_datos(nombre_archivo = "indice_con_dummies.csv",carpeta = "processed")
-indice_en_diferencia
-
-# La transofrmamos en una serie de tiempo
-mi_serie <- ts(indice_en_diferencia$log_diferencia, start = c(2002, 6), frequency = 12)
-
-
+mi_serie<-readRDS(file.path(dir_data_clean, "serie.rds"))
+mi_serie
+# HACER VECTOR DE DUMMIES
+dummy <- ts(0, start = start(mi_serie), end = end(mi_serie), frequency = frequency(mi_serie))
+#Llenamos con 1 a partir de la fecha de quiebre
+window(dummy, start = c(2018, 6)) <- 1
+window(dummy, start = c(2020, 4)) <- 2
+dummy
 #==============================================================================#
 # Nos ponemos a hacer los distintos modelo 
 #==============================================================================#
-auto.arima(mi_serie, stepwise = FALSE, approximation = FALSE, xreg = indice_en_diferencia$dummie) 
+auto.arima(mi_serie, stepwise = FALSE, approximation = FALSE, xreg = dummy) 
+#con dummies en 2020m4 - ARIMA(0,0,3) - AIC=-79   AICc=-79   BIC=-66
+#con dos dummies en 2018m6 y 2020m4 - ARIMA(0,0,3) -  IC=-79   AICc=-79   BIC=-66
+# sin dummies ARIMA(0,0,3) - AIC=-81   AICc=-81   BIC=-71
+
 # Regression with ARIMA(0,0,1)(2,0,0)[12] errors
 
 # La funcion nos devuelve que el mejor modelo es uno que depende del valor anterior y del mismo mes uno y dos años atras ARIMA(1,0,0)(2,0,0)[12] 
@@ -22,41 +27,40 @@ lista_modelos_ar<-list()
 for(i in 1:12){
   nombre <- paste0("AR", i) # Crea el nombre "AR1"..->
   lista_modelos_ar[[nombre]] <- arima(mi_serie, 
-                                      order = c(i, 0, 0), 
-                                      xreg = indice_en_diferencia$dummie)
+                                      order = c(i, 0, 0),xreg=dummy)
 }
 
 lista_modelos_ma<-list()
 for(i in 1:12){
   nombre <- paste0("ma", i) # Crea el nombre "AR1"..->
   lista_modelos_ma[[nombre]] <- arima(mi_serie, 
-                                      order = c(0, 0, i), 
-                                      xreg = indice_en_diferencia$dummie)
+                                      order = c(0, 0, i),xreg=dummy)
 }
 
+modelo_arma01 <- arima(mi_serie, order = c(1, 0, 1), xreg = dummy) # aic = -491**
+modelo_arma02 <- arima(mi_serie, order = c(2, 0, 1), xreg = dummy) # aic = -489
+modelo_arma03 <- arima(mi_serie, order = c(1, 0, 2), xreg = dummy) # aic = -489
+modelo_arma04 <- arima(mi_serie, order = c(2, 0, 2), xreg = dummy) # aic = -488
+modelo_arma05 <- arima(mi_serie, order = c(3, 0, 3), xreg = dummy)
+modelo_arma06 <- arima(mi_serie, order = c(4, 0, 4), xreg = dummy)
+modelo_arma07 <- arima(mi_serie, order = c(5, 0, 5), xreg = dummy)
+modelo_arma08 <- arima(mi_serie, order = c(6, 0, 6), xreg = dummy)
 
-modelo_arma01 <- arima(mi_serie, order = c(1, 0, 1), xreg = indice_en_diferencia$dummie) # aic = -491**
-modelo_arma02 <- arima(mi_serie, order = c(2, 0, 1), xreg = indice_en_diferencia$dummie) # aic = -489
-modelo_arma03 <- arima(mi_serie, order = c(1, 0, 2), xreg = indice_en_diferencia$dummie) # aic = -489
-modelo_arma04 <- arima(mi_serie, order = c(2, 0, 2), xreg = indice_en_diferencia$dummie) # aic = -488
-modelo_arma05 <- arima(mi_serie, order = c(3, 0, 3), xreg = indice_en_diferencia$dummie)
-modelo_arma06 <- arima(mi_serie, order = c(4, 0, 4), xreg = indice_en_diferencia$dummie)
-modelo_arma07 <- arima(mi_serie, order = c(5, 0, 5), xreg = indice_en_diferencia$dummie)
-modelo_arma08 <- arima(mi_serie, order = c(6, 0, 6), xreg = indice_en_diferencia$dummie)
 
-BIC(modelo_arma12)#-420
-barlett(modelo_arma12)
-ljung(modelo_arma12) 
 modelo_arma13<-arima(mi_serie, order = c(12, 0, 2)) # aic = -500
-BIC(modelo_arma13)#-447
+BIC(modelo_arma13)#-27 muy pobre
+
+#==============================================================================#
+# Summary de ar y ma
+#==============================================================================#
+summary_ar<-sapply(lista_modelos_ar, summary)
+summary_ma<-sapply(lista_modelos_ma, summary)
+
+summary(lista_modelos_ma$ma3)
+summary(lista_modelos_ar$AR4)
 
 
 
-
-nombres_modelo<-paste0("modelo_ar", str_pad(string = 1:12,width = 2,pad = "0"))
-nombres_modelo
-resultados_bic <- sapply(nombres_modelo, function(nombre) {
-  BIC(get(nombre))})
 #==============================================================================#
 # Analisis BIC Y analisis AIC
 #==============================================================================#
@@ -100,18 +104,6 @@ sort(ljung_para_arma, decreasing = T)
 
 # ***CONCLUSIÓN***
 # SON TODOS BASURA NIGGA
-
-#==============================================================================#
-# Calculamos los quiebres en la varianza usando Bai-Perron 
-#que no es lo mejor pero es mejor que nada
-#==============================================================================#
-bai_perron_result<-sapply(vector_nombres_modelos, function(modelo){bai_perron(get(modelo))})
-bai_perron_result
-
-#en la mayoria de los casos el quiebre es el 78
-indice_en_diferencia[78,]
-# corresponde al 2008m11
-
 
 #==============================================================================#
 # CONCLUSION: como vimos con el test de BaiPerron esta mierda tiene cambio es-

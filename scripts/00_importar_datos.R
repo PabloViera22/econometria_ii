@@ -138,8 +138,11 @@ exportar_data(data = indice_construya_acortado,nombre ="indice_construya_acortad
 #==============================================================================#
 # datos de indice de inflacion de la ciudad
 #==============================================================================#
-inflacion<-impo_datos(nombre_archivo = "indice-precios-al-consumidor-apertura-por-categorias-base-diciembre-2016-mensual.csv", carpeta = "raw")
-inflacion_nombre<-inflacion%>%select(indice_tiempo, ipc_nivel_general_nacional)
+inflacion<-impo_datos(nombre_archivo = "indice-precios-al-consumidor-apertura-por-categorias-base-diciembre-2016-mensual.csv", 
+                      carpeta = "raw")
+inflacion_nombre<-inflacion%>%
+  select(indice_tiempo, ipc_nivel_general_nacional)%>%
+  mutate(ipc=(ipc_nivel_general_nacional/dplyr::lag(ipc_nivel_general_nacional))-1)
 
 inflacion_acortada<-inflacion_nombre%>%filter(indice_tiempo <="2025-11-01")%>%
   filter(indice_tiempo >="2017-01-01")%>%
@@ -147,10 +150,59 @@ inflacion_acortada<-inflacion_nombre%>%filter(indice_tiempo <="2025-11-01")%>%
 #hasta 2025/08
 exportar_data(data = inflacion_acortada,nombre = "inflacion_acortada",carpeta = "clean")
 
+#==============================================================================#
+# datos de tasa de interés real
+#==============================================================================#
+inflacion_acortada_m<-inflacion_acortada%>%rename(fecha=indice_tiempo)
+badlar_acortado
+
+interes_real<-badlar_acortado%>%
+  left_join(inflacion_acortada_m,by = "fecha")%>%
+  select(-ipc_nivel_general_nacional)%>%
+  mutate(badlar_mensualizado=valor_badlar_porc/1200)%>%
+  mutate(interes_real= (1+badlar_mensualizado)/(1+ipc)-1)%>%
+  select(fecha, interes_real)
+
+ggplot(data = interes_real, aes(x = fecha, y = interes_real)) + 
+  geom_line(color = "steelblue") + 
+  theme_minimal()
+
+exportar_data(data = interes_real,nombre = "interes_real",carpeta = "clean")
+
+#==============================================================================#
+# Hay que hacer la union de dos dataframe para stata
+#==============================================================================#
+
+itcrm<-impo_datos(nombre_archivo = "itcrm_acortado.csv",carpeta = "clean")
+construya<-impo_datos(nombre_archivo = "indice_construya_acortado.csv",carpeta = "clean")
+
+construya_itcrm<-construya%>%left_join(itcrm,by = "fecha")%>%select(-desestacionalizado)
+exportar_data(data = construya_itcrm,nombre = "construya_itcrm",carpeta = "clean")
+
+#==============================================================================#
+# Combinamos las 4 series
+#==============================================================================#
+interes<-impo_datos(nombre_archivo = "badlar_acortado.csv",carpeta = "clean")
+emae<-impo_datos(nombre_archivo = "emae_acortado.csv",carpeta = "clean")
+interes_real<-impo_datos(nombre_archivo = "interes_real.csv",carpeta = "clean")
+
+series_juntas<-construya_itcrm%>%
+  left_join(interes,by = "fecha")%>%
+  left_join(emae,by = "fecha")%>%
+  rename(construya=con_estacionalidad)%>%
+  left_join(interes_real,by = "fecha")%>%
+  arrange(fecha)
+exportar_data(data = series_juntas,nombre = "series_juntas",carpeta = "clean", format = "excel")
 
 
 
 
- 
- 
- 
+
+
+
+
+
+
+
+
+
