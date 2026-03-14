@@ -1,7 +1,5 @@
 source(here::here("config", "parametros.R"))
 source(here::here("funciones", "funciones_para_importar_exportar.R"))
-source(here::here("funciones", "funciones_visualizacion.R"))
-
 #==============================================================================#
 # Fecha piso mas alta y ultima fecha menor
 #==============================================================================#
